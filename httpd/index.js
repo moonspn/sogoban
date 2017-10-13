@@ -1,18 +1,21 @@
-var http = require('http');
+ 'use strict';
 
-http.createServer((request, response) => {
-let fs = require('fs')
+ let http = require('http');
 
-fs.readFile('index.html', (err, data) => {
-response.writeHead(200, {
-'Content-Type': 'text/html'
-});
-response.write(data);
-response.end();
-});
-}).listen(8081);
+ http.createServer((request, response) => {
+ // 取得 node.js 的 fs 模組
+ let fs = require('fs')
 
-// log message to Console
-console.log('Server running at http://127.0.0.1:8081/');
+ fs.readFile('../htdocs/index.html', (err, data) => {
+ response.writeHead(200, {
+ 'Content-Type': 'text/html'
+ });
 
-// index.js
+ response.write(data);
+
+ response.end();
+ });
+ }).listen(8088);
+
+ // log message to Console
+ console.log(' 伺服器啟動，連線 url: http://127.0.0.1:8088/');
