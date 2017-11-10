@@ -2,6 +2,32 @@
 
 let http = require('http');
 
+/**
+* 利⽤ http.ServerResponse 物件回傳檔案內容
+*
+* @name serve
+* @function
+* @param response - http.ServerResponse 物件
+* @param fname - 要回傳的檔案名
+* @param datatype - 回傳檔案內容的 Mine-Type
+* @returns {undefined}
+*/
+let serve = (response, fname, datatype) => {
+  let fs = require('fs');
+  fs.readFile(fname, (err, data) => {
+    if (err) {
+      console.log(' 檔案讀取錯誤');
+    }
+    else {
+      response.writeHead(200, {
+        'Content-Type': datatype
+      });
+      response.write(data);
+      response.end();
+    }
+  });
+};
+
 http.createServer((request, response) => {
   let fs = require('fs');
   let postData = ''; // POST 資料
@@ -19,53 +45,20 @@ http.createServer((request, response) => {
   request.on('end', () => {
     switch (request.url) {
       case '/':
-      fs.readFile('../htdocs/index.html', (err, data) => {
-        if (err) {
-          console.log(' 檔案讀取錯誤');
-        }
-        else {
-          response.writeHead(200, {
-            'Content-Type': 'text/html'
-          });
-
-          response.write(data);
-          response.end();
-        }
-      });
+        serve(response, '../htdocs/index.html', 'text/html');
 
       break;
 
       case '/assets/css/styles.css':
-      fs.readFile('../htdocs/assets/css/styles.css', (err, data) => {
-        if (err) {
-          console.log(' 檔案讀取錯誤');
-        }
-        else {
-          response.writeHead(200, {
-            'Content-Type': 'text/css'
-          });
-
-          response.write(data);
-          response.end();
-        }
-      });
+        serve(response, '../htdocs/assets/css/styles.css', 'text/css');
 
       break;
 
       case '/assets/png/SokobanClone_byVellidragon.png':
-      fs.readFile('../htdocs/assets/png/SokobanClone_byVellidragon.png', (err, data) => {
-        if (err) {
-          console.log(' 檔案讀取錯誤');
-        }
-        else {
-          response.writeHead(200, {
-            'Content-Type': 'image/png'
-          });
-
-          response.write(data);
-          response.end();
-        }
-      });
+        serve(response,
+          '../htdocs/assets/png/SokobanClone_byVellidragon.png',
+           'image/png'
+         );
 
       break;
 
