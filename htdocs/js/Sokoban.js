@@ -24,7 +24,6 @@
  *  *    箱子在目標點上 (box on goal square)
  *  空白 地板 (floor)
  */
-//TS Add
  var GoalNo=0;
  var BoxOnGoalNo=0;
 
@@ -635,7 +634,7 @@ let sokoban = {
   update: function (e) {
     this.move(e);
     this.paint();
-	
+
 	if (GoalNo == 0)
 
 		alert("你贏了");
