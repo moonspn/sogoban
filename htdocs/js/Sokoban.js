@@ -159,7 +159,7 @@ let tileset = {
       width: 32,
       height: 32,
     },
-    boxOnGoal: {
+    box_On_Goal: {
       x: 32,
       y: 0,
       width: 32,
@@ -617,7 +617,7 @@ let sokoban = {
    */
   tiling: {
     BOX: 'box',
-    BOX_ON_GOAL: 'boxOnGoal',
+    BOX_ON_GOAL: 'box_On_Goal',
     FLOOR: 'floor',
     GOAL: 'goal',
     GROUND: 'ground',
