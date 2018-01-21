@@ -24,11 +24,11 @@
  *  *    箱子在目標點上 (box on goal square)
  *  空白 地板 (floor)
  */
- //TS Add
-  var GoalNo=0; //計算關卡要幾個箱子到終點
-  var BoxOnGoalNo=0; //現在已經有多少箱子歸位。
+//TS Add
+ var GoalNo=0;
+ var BoxOnGoalNo=0;
 
-const SOKOBAN = {
+ const SOKOBAN = {
   BOX: '$',
   BOX_ON_GOAL: '*',
   FLOOR: ' ',
@@ -37,10 +37,6 @@ const SOKOBAN = {
   MAN: '@',
   MAN_ON_GOAL: '+',
   WALL: '#',
-  DOWN: 'd',
-  LEFT: 'l',
-  RIGHT: 'r',
-  UP: 'u',
 };
 
 /**
@@ -91,6 +87,50 @@ let levels = [
       "--#  .#-------",
       "--#####-------"
     ],
+
+    [
+       "###########---",
+       "#    .#   #---",
+       "#   #    ##---",
+       "#   ##    #---",
+       "##    $   #---",
+       "-#  #  #  ###-",
+       "## $   #  . #-",
+       "#  $    $  ##-",
+       "##    # #  .#-",
+       "-##  @#######-",
+       "--#  .#-------",
+       "--#####-------"
+     ],
+
+     [
+            "-##########---",
+            "-#.   #   #---",
+            "###   #  ##---",
+            "#   #  $   #--",
+            "##    $    #---",
+            "-#  #  #   ##-",
+            "## $   ##   #-",
+            "#  $        #-",
+            "##    #.#  .#-",
+            "-##  @#######-",
+            "--#  .#-------",
+            "--#####-------"
+          ],
+      [
+         "###########---",
+         "## # .#   ##--",
+         "#   #     #--",
+         "#    # ##  ##-",
+         "##    $ #   #-",
+         "#  #     $  #-",
+         "## $  ##    #-",
+         "#    #     ##-",
+         "#  #  ###  .#-",
+         "# #  @#  ####-",
+         "# #      . #--",
+         "############--"
+       ],
 ];
 
 /**
@@ -120,14 +160,12 @@ let tileset = {
       width: 32,
       height: 32,
     },
-
-    box_ON_GOAL: {
+    boxOnGoal: {
       x: 32,
       y: 0,
       width: 32,
       height: 32,
     },
-
     wall: {
       x: 64,
       y: 0,
@@ -141,14 +179,12 @@ let tileset = {
       width: 32,
       height: 32,
     },
-
     goal: {
       x: 32,
       y: 32,
       width: 32,
       height: 32,
     },
-
     ground: {
       x: 64,
       y: 32,
@@ -156,28 +192,26 @@ let tileset = {
       height: 32,
     },
 
-    right: {
+    faceRight: {
       x: 0,
       y: 64,
       width: 32,
       height: 32,
     },
-
-    down: {
+    faceDown: {
       x: 32,
       y: 64,
       width: 32,
       height: 32,
     },
 
-    up: {
+    faceUp: {
       x: 0,
       y: 96,
       width: 32,
       height: 32,
     },
-
-    left: {
+    faceLeft: {
       x: 32,
       y: 96,
       width: 32,
@@ -429,7 +463,10 @@ let prototypeGameState = {
 
   putBoxOnGoal: function ({x, y}) {
     this.level[y] = replaceAt(this.level[y], x, SOKOBAN.BOX_ON_GOAL);
-
+	//BoxOnGoalNo++;
+	//alert(GoalNo);
+	//if (GoalNo == 0)
+	//alert("you win");
     return this;
   },
 
@@ -473,10 +510,10 @@ let drawBoardGrid = (ctx) => {
   // 開始記録格線的 paths
   ctx.beginPath();
 
-  // 畫 12 條鉛直斷續線
-  for (var c = 1; c < 12; c ++) {
+  // 畫 18 條鉛直斷續線
+  for (var c = 1; c < 18; c ++) {
     ctx.moveTo(c * 32, 0);
-    ctx.lineTo(c * 32, 32*12);
+    ctx.lineTo(c * 32, 32*18);
   }
 
   // 畫 12 條水平斷續線
@@ -505,22 +542,22 @@ let sokoban = {
     };
 
     if (this.isMan(this.cellDown(cell))) {
-      this.tiling[SOKOBAN.MAN] = this.tiling[SOKOBAN.UP];
+      this.man = this.faceUp;
       this.moveManUp(cell);
     }
 
     if (this.isMan(this.cellLeft(cell))) {
-      this.tiling[SOKOBAN.MAN] = this.tiling[SOKOBAN.RIGHT];
+      this.man = this.faceRight;
       this.moveManRight(cell);
     }
 
     if (this.isMan(this.cellRight(cell))) {
-      this.tiling[SOKOBAN.MAN] = this.tiling[SOKOBAN.LEFT];
+      this.man = this.faceLeft;
       this.moveManLeft(cell);
     }
 
     if (this.isMan(this.cellUp(cell))) {
-      this.tiling[SOKOBAN.MAN] = this.tiling[SOKOBAN.DOWN];
+      this.man = this.faceDown;
       this.moveManDown(cell);
     }
   },
@@ -532,37 +569,37 @@ let sokoban = {
    */
   paint: function () {
     let height = this.level.length;
-
-    for (let x = 0; x < height; x ++) {
+	GoalNo=0;
+	 for (let x = 0; x < height; x ++) {
       for (let y = 0; y < height; y ++) {
         this.brush.save();
         this.brush.translate(32*x, 32*y);
 
-        let value = this.level[y].charAt(x);
+        Object.entries(SOKOBAN).some(([key, value]) => {
+          if (value == this.level[y].charAt(x)) {
+            switch (value) {
+              case SOKOBAN.MAN:
+                this.floor();
+                break;
 
-        switch (value) {
-          case SOKOBAN.MAN:
-            this.tiling[SOKOBAN.FLOOR]();
-
-            break;
-
-          case SOKOBAN.MAN_ON_GOAL:
-            this.tiling[SOKOBAN.GOAL]();
-            value = SOKOBAN.MAN;
-
-            break;
-        };
-
-        this[this.tiling[key]];
-        //不能用，任何移動都是用pain來重新繪製，GoalNo會每次增加該關所有的goal
-  			//TS add start
-  			if (key=="GOAL"||key=="MAN_ON_GOAL") GoalNo++;
-  			//TS add End
-              return true;
+              case SOKOBAN.MAN_ON_GOAL:
+                this.goal();
+                break;
             };
+
+            this[this.tiling[key]]();
+
+			if (key=="GOAL"||key=="MAN_ON_GOAL") GoalNo++;
+			//TS add End
+            return true;
+          };
+        });
+
         this.brush.restore();
       };
+    };
   },
+
 
   /**
    * 依傳入的遊戲關卡編號，初始遊戲
@@ -571,47 +608,39 @@ let sokoban = {
    */
   start: function (level) {
     this.level = JSON.parse(JSON.stringify(levels[level]));
-    this.paint();
+	//GoalNo=0; // TS Add 每次開新關卡時將 GoalNo 有幾個箱子要歸位設為 0 重新計算。
+    //BoxOnGoalNo=0;//TS add 同上
+	this.paint();
   },
 
   /**
    * 貼圖函式和指令的對應表
    */
-   tiling: {
-      BOX: 'box',
-      BOX_ON_GOAL: 'box_On_Goal',
-      FLOOR: 'floor',
-      GOAL: 'goal',
-      GROUND: 'ground',
-      MAN: 'man',
-      MAN_ON_GOAL: 'man',
-      WALL: 'wall',
-      RIGHT: 'right',
-      DOWN: 'down',
-      UP: 'up',
-      LEFT:'left',
-    },
-
+  tiling: {
+    BOX: 'box',
+    BOX_ON_GOAL: 'boxOnGoal',
+    FLOOR: 'floor',
+    GOAL: 'goal',
+    GROUND: 'ground',
+    MAN: 'man',
+    MAN_ON_GOAL: 'man',
+    WALL: 'wall',
+  },
 
   /**
-   * 更新函式
+   * 遊戲更新介面函式
    *
    * @returns {undefined}
    */
   update: function (e) {
     this.move(e);
-
-    if(this.goodGame()) {
-      if (this.winning = requestAnimation)
     this.paint();
+	//alert(GoalNo);
+	if (GoalNo == 0)
 
-    if (box_On_Goal == 0)
-    alert("你贏了！恭喜！！")
+		alert("你贏了");
 
-           //alert(You win);
-         //[0,1,2].forEach(n=>{console.log(n);)};
- },
-
+  },
 };
 
 /**
@@ -621,7 +650,7 @@ let sokoban = {
  * @returns HTML 'section' 物件，含有關卡選擇按鈕
  */
 let controlPane = (sokoban) => {
-  let choices = [ '第一關', '第二關', '第三關' ];
+  let choices = [ '第一關', '第二關', '第三關', '第四關', '第五關', '第六關' ];
 
   let section = document.createElement('section');
   section.style.gridArea = '5 / 2 / 6 / 5';
@@ -661,16 +690,16 @@ let newGame = (ctx, tileset) => {
   let spriteSheet = new Image();
   spriteSheet.src = tileset.src;
 
-  Object.entries(tileset.tile).forEach(([key, value]) => {
-    value.y += 6 * 64;
+  Object.keys(tileset.tile).forEach(key => {
+    tileset.tile[key].y += 6 * 64;
 
-    game.tiling[key] = tile.bind(
-      game, spriteSheet, value
+    game[key] = tile.bind(
+      game, spriteSheet, tileset.tile[key]
     );
   });
 
   game.brush = ctx;
-  game.tiling[SOKOBAN.MAN] = game.tiling[SOKOBAN.UP];
+  game.man = game.faceUp;
 
   return game;
 };
